@@ -342,7 +342,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     // Initial call to set the correct state of the suggestions view
-    updateSuggestionViewDisplay();
+    updateSuggestionViewDisplay(); // Show "No suggestions text" initially or last known state
+
+    // When Suggestions tab is clicked, try to generate new suggestions
+    if (navSuggestionsButton) {
+        navSuggestionsButton.addEventListener('click', () => {
+            showView({ view: suggestionsView, button: navSuggestionsButton });
+            if (!currentSuggestions) { // Only generate if no active suggestions displayed
+                generateSuggestionsFromFeedback();
+            } else {
+                // If currentSuggestions exist, it means user clicked a tweet's suggest button,
+                // so we don't overwrite those with feedback-based ones immediately.
+                // updateSuggestionViewDisplay will ensure the existing ones are shown.
+                populateSuggestionsView(currentSuggestions);
+            }
+        });
+    }
+
 
     let ignoredSuggestions = new Set(); // In-memory set for current session
 
@@ -363,6 +379,130 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Call on popup load
     loadIgnoredSuggestions();
+
+    // --- Suggestion Engine based on Feedback ---
+    async function generateSuggestionsFromFeedback() {
+        console.log("Attempting to generate suggestions from feedback...");
+        chrome.runtime.sendMessage({ type: "GET_LOGGED_ENCOUNTERS" }, (response) => {
+            if (chrome.runtime.lastError || !response || !response.encounters) {
+                console.error("Error getting encounters for feedback suggestions:", chrome.runtime.lastError?.message);
+                currentSuggestions = { source: "feedback_error", suggestions: { handles: [], hashtags: [], keywords: [], urls: [] } };
+                updateSuggestionViewDisplay(); // Show no suggestions or error
+                return;
+            }
+
+            const relevantEncounters = response.encounters.filter(enc => enc.userFeedback === 'relevant');
+            if (relevantEncounters.length === 0) {
+                console.log("No relevant encounters found to generate feedback-based suggestions.");
+                currentSuggestions = { source: "feedback_none", suggestions: { handles: [], hashtags: [], keywords: [], urls: [] } };
+                updateSuggestionViewDisplay();
+                return;
+            }
+
+            console.log(`Found ${relevantEncounters.length} relevant encounters for suggestion generation.`);
+
+            const potentialSuggestions = {
+                handles: new Map(), // Store counts for ranking
+                hashtags: new Map(),
+                keywords: new Map(),
+                urls: new Map() // Though URLs might be less common for co-occurrence from just text
+            };
+
+            // Simple stop words list (can be expanded or moved to a shared utility)
+            const stopWords = new Set([
+                'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had',
+                'do', 'does', 'did', 'will', 'would', 'should', 'can', 'could', 'may', 'might', 'must',
+                'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them',
+                'my', 'your', 'his', 'its', 'our', 'their', 'mine', 'yours', 'hers', 'ours', 'theirs',
+                'to', 'of', 'in', 'on', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into',
+                'through', 'during', 'before', 'after', 'above', 'below', 'from', 'up', 'down', 'out',
+                'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where',
+                'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some',
+                'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't',
+                'just', 'don', 'shouldve', 'now', 'd', 'll', 'm', 'o', 're', 've', 'y', 'ain', 'aren',
+                'couldn', 'didn', 'doesn', 'hadn', 'hasn', 'haven', 'isn', 'ma', 'mightn', 'mustn',
+                'needn', 'shan', 'shouldn', 'wasn', 'weren', 'won', 'wouldn', 'rt',
+                'this', 'that', 'these', 'those', 'am', 'and', 'but', 'if', 'or', 'because', 'as',
+                'until', 'while', 'at', 'by', 'about',
+                'tweet', 'twitter', 'post', 'link', 'video', 'image', 'photo', 'http', 'https', 'com', 'www', 'org', 'net', 'io'
+            ]);
+
+
+            relevantEncounters.forEach(encounter => {
+                const text = encounter.tweetText;
+
+                // Extract handles
+                const handleRegex = /@(\w{1,15})/g;
+                let match;
+                while ((match = handleRegex.exec(text)) !== null) {
+                    const handle = `@${match[1].toLowerCase()}`;
+                    if (!trackingElements.some(el => el.value.toLowerCase() === handle && el.type === 'handle') && !ignoredSuggestions.has(`handle:${handle}`)) {
+                        potentialSuggestions.handles.set(handle, (potentialSuggestions.handles.get(handle) || 0) + 1);
+                    }
+                }
+
+                // Extract hashtags
+                const hashtagRegex = /#(\w+)/g;
+                while ((match = hashtagRegex.exec(text)) !== null) {
+                    const hashtag = `#${match[1].toLowerCase()}`;
+                     if (!trackingElements.some(el => el.value.toLowerCase() === hashtag && el.type === 'hashtag') && !ignoredSuggestions.has(`hashtag:${hashtag}`)) {
+                        potentialSuggestions.hashtags.set(hashtag, (potentialSuggestions.hashtags.get(hashtag) || 0) + 1);
+                    }
+                }
+
+                // Extract URLs (simple version, could be more robust)
+                const urlRegex = /(https?:\/\/[^\s]+)/g;
+                while((match = urlRegex.exec(text)) !== null) {
+                    const url = match[0];
+                    // Basic filter for common shorteners or generic domains if desired
+                    if (!trackingElements.some(el => el.value === url && el.type === 'url_pattern') && !ignoredSuggestions.has(`url_pattern:${url}`)) {
+                         // For URLs, we might not want to rank by frequency as much as just presence
+                        potentialSuggestions.urls.set(url, (potentialSuggestions.urls.get(url) || 0) + 1);
+                    }
+                }
+
+                // Extract keywords
+                let cleanedText = text.toLowerCase();
+                // Remove already found entities to avoid them becoming keywords
+                potentialSuggestions.handles.forEach((_,h) => cleanedText = cleanedText.replace(new RegExp(h.substring(1), 'gi'), ''));
+                potentialSuggestions.hashtags.forEach((_,h) => cleanedText = cleanedText.replace(new RegExp(h, 'gi'), ''));
+                // Basic URL removal for keyword extraction
+                cleanedText = cleanedText.replace(/https?:\/\/[^\s]+/g, '');
+
+
+                const words = cleanedText.replace(/[^\w\s']/g, '').split(/\s+/); // Keep apostrophes for contractions, remove other punctuation
+                words.forEach(word => {
+                    const wLower = word.toLowerCase();
+                    if (wLower.length > 3 && wLower.length < 25 && !stopWords.has(wLower) && !/^\d+$/.test(wLower)) {
+                         if (!trackingElements.some(el => el.value.toLowerCase() === wLower && el.type === 'keyword') && !ignoredSuggestions.has(`keyword:${wLower}`)) {
+                            potentialSuggestions.keywords.set(wLower, (potentialSuggestions.keywords.get(wLower) || 0) + 1);
+                        }
+                    }
+                });
+            });
+
+            // Convert Maps to sorted arrays of suggestions (top N, e.g., top 5 of each)
+            const MAX_SUGGESTIONS_PER_CATEGORY = 5;
+            const getTopN = (map) => Array.from(map.entries())
+                                      .sort((a, b) => b[1] - a[1]) // Sort by count descending
+                                      .slice(0, MAX_SUGGESTIONS_PER_CATEGORY)
+                                      .map(entry => entry[0]);
+
+            currentSuggestions = {
+                tweetUrl: null, // Indicate these are not from a single tweet
+                tweetAuthor: "Feedback Analysis",
+                tweetText: `Generated from ${relevantEncounters.length} relevant encounter(s).`,
+                suggestions: {
+                    handles: getTopN(potentialSuggestions.handles),
+                    hashtags: getTopN(potentialSuggestions.hashtags),
+                    keywords: getTopN(potentialSuggestions.keywords),
+                    urls: getTopN(potentialSuggestions.urls)
+                }
+            };
+            populateSuggestionsView(currentSuggestions);
+        });
+    }
+
 
     // --- Settings View Additions ---
     const settingsViewSection = document.getElementById('settingsView');
@@ -448,24 +588,124 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        filteredEncounters.forEach(encounter => {
+        filteredEncounters.forEach((encounter, index) => { // Use index from filteredEncounters for unique IDs
             const li = document.createElement('li');
             const date = new Date(encounter.timestamp).toLocaleString();
 
             let notesText = encounter.matchedElement.notes ? ` [${encounter.matchedElement.notes}]` : '';
 
-            li.innerHTML = `
-                <div class="encounter-details">
-                    <strong class="matched-element-value">${escapeHTML(encounter.matchedElement.value)}</strong>
-                    <span class="matched-element-type">(${escapeHTML(encounter.matchedElement.type)})${escapeHTML(notesText)}</span><br>
-                    <span class="tweet-author">Author: ${escapeHTML(encounter.tweetAuthor)}</span><br>
-                    <span class="tweet-text-snippet">Tweet: "${escapeHTML(encounter.tweetText.substring(0, 100))}${encounter.tweetText.length > 100 ? '...' : ''}"</span><br>
-                    <a href="${encounter.tweetUrl}" target="_blank" class="tweet-link">View Tweet</a> - <span class="timestamp">${date}</span>
-                </div>
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'encounter-details';
+            detailsDiv.innerHTML = `
+                <strong class="matched-element-value">${escapeHTML(encounter.matchedElement.value)}</strong>
+                <span class="matched-element-type">(${escapeHTML(encounter.matchedElement.type)})${notesText}</span><br>
+                <span class="tweet-author">Author: ${escapeHTML(encounter.tweetAuthor)}</span><br>
+                <span class="tweet-text-snippet">Tweet: "${escapeHTML(encounter.tweetText.substring(0, 100))}${encounter.tweetText.length > 100 ? '...' : ''}"</span><br>
+                <a href="${encounter.tweetUrl}" target="_blank" class="tweet-link">View Tweet</a> - <span class="timestamp">${date}</span>
             `;
-            // Add a class for styling based on element type or notes if desired
-            // li.classList.add(`type-${encounter.matchedElement.type}`);
+
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'encounter-actions';
+
+            const relevantButton = document.createElement('button');
+            relevantButton.className = 'feedback-button relevant';
+            relevantButton.title = 'Mark as Relevant';
+            relevantButton.innerHTML = '👍';
+            relevantButton.dataset.encounterUrl = encounter.tweetUrl;
+            relevantButton.dataset.elementValue = encounter.matchedElement.value;
+            relevantButton.dataset.elementType = encounter.matchedElement.type;
+            relevantButton.dataset.feedback = 'relevant';
+
+            const irrelevantButton = document.createElement('button');
+            irrelevantButton.className = 'feedback-button irrelevant';
+            irrelevantButton.title = 'Mark as Irrelevant';
+            irrelevantButton.innerHTML = '👎';
+            irrelevantButton.dataset.encounterUrl = encounter.tweetUrl;
+            irrelevantButton.dataset.elementValue = encounter.matchedElement.value;
+            irrelevantButton.dataset.elementType = encounter.matchedElement.type;
+            irrelevantButton.dataset.feedback = 'irrelevant';
+
+            updateFeedbackButtonStates(relevantButton, irrelevantButton, encounter.userFeedback);
+
+            relevantButton.addEventListener('click', handleFeedbackButtonClick);
+            irrelevantButton.addEventListener('click', handleFeedbackButtonClick);
+
+            actionsDiv.appendChild(relevantButton);
+            actionsDiv.appendChild(irrelevantButton);
+
+            li.appendChild(detailsDiv);
+            li.appendChild(actionsDiv);
             encountersLogUL.appendChild(li);
+        });
+    }
+
+    function updateFeedbackButtonStates(relevantBtn, irrelevantBtn, feedbackState) {
+        relevantBtn.classList.remove('marked-relevant', 'disabled');
+        irrelevantBtn.classList.remove('marked-irrelevant', 'disabled');
+
+        if (feedbackState === 'relevant') {
+            relevantBtn.classList.add('marked-relevant');
+            irrelevantBtn.classList.add('disabled'); // Disable other button
+        } else if (feedbackState === 'irrelevant') {
+            irrelevantBtn.classList.add('marked-irrelevant');
+            relevantBtn.classList.add('disabled'); // Disable other button
+        }
+    }
+
+    async function handleFeedbackButtonClick(event) {
+        const button = event.currentTarget;
+        const { encounterUrl, elementValue, elementType, feedback } = button.dataset;
+
+        // Find the original encounter in allEncounters to check its current feedback state
+        const originalEncounterIndex = allEncounters.findIndex(enc =>
+            enc.tweetUrl === encounterUrl &&
+            enc.matchedElement.value === elementValue &&
+            enc.matchedElement.type === elementType
+        );
+
+        if (originalEncounterIndex === -1) {
+            console.error("Could not find original encounter for feedback.");
+            return;
+        }
+
+        const currentFeedback = allEncounters[originalEncounterIndex].userFeedback;
+        let newFeedback = feedback;
+
+        // If clicking the same button again, effectively unmark it
+        if (currentFeedback === feedback) {
+            newFeedback = null; // Or 'none', or undefined
+        }
+
+        // Send message to background to update storage
+        chrome.runtime.sendMessage({
+            type: "MARK_ENCOUNTER_FEEDBACK",
+            data: {
+                tweetUrl: encounterUrl,
+                elementValue: elementValue,
+                elementType: elementType,
+                feedback: newFeedback
+            }
+        }, (response) => {
+            if (chrome.runtime.lastError) {
+                console.error("Error marking feedback:", chrome.runtime.lastError.message);
+                alert("Error saving feedback.");
+            } else if (response && response.success) {
+                // Update local cache and UI
+                allEncounters[originalEncounterIndex].userFeedback = newFeedback;
+
+                // Update buttons in the DOM directly
+                const parentLi = button.closest('li');
+                if (parentLi) {
+                    const relevantBtn = parentLi.querySelector('.feedback-button.relevant');
+                    const irrelevantBtn = parentLi.querySelector('.feedback-button.irrelevant');
+                    if (relevantBtn && irrelevantBtn) {
+                         updateFeedbackButtonStates(relevantBtn, irrelevantBtn, newFeedback);
+                    }
+                }
+                // No need to call renderEncounters() fully unless sorting/filtering changes based on feedback
+            } else {
+                alert("Failed to save feedback: " + (response ? response.status : "Unknown error"));
+            }
         });
     }
 

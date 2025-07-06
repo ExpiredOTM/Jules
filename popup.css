@@ -383,6 +383,62 @@ footer {
     background-color: #FFC107; /* Brighter amber */
 }
 
+/* Encounter item actions (for feedback buttons) */
+.encounter-actions {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-left: 10px;
+}
+
+.feedback-button {
+    background: none;
+    border: 1px solid var(--text-secondary);
+    color: var(--text-secondary);
+    padding: 3px 6px;
+    font-size: 0.9em;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-bottom: 4px;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+.feedback-button:last-child {
+    margin-bottom: 0;
+}
+
+.feedback-button:hover {
+    opacity: 1;
+}
+
+.feedback-button.relevant:hover {
+    background-color: rgba(0, 255, 0, 0.2); /* Light green */
+    border-color: #00e676;
+    color: #00e676;
+}
+.feedback-button.irrelevant:hover {
+    background-color: rgba(255, 0, 0, 0.2); /* Light red */
+    border-color: #ff5252;
+    color: #ff5252;
+}
+
+.feedback-button.marked-relevant {
+    background-color: var(--accent-cyan-dulled) !important;
+    color: var(--dark-bg) !important;
+    border-color: var(--accent-cyan-dulled) !important;
+    opacity: 1 !important;
+}
+.feedback-button.marked-irrelevant {
+    background-color: var(--accent-pink-dulled) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--accent-pink-dulled) !important;
+    opacity: 1 !important;
+}
+.feedback-button.disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+
 /* Suggestion specific list styling */
 .suggestion-category {
     margin-bottom: 15px;

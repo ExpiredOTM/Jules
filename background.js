@@ -95,6 +95,33 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             sendResponse({ status: "All encounters cleared successfully."});
         });
         return true;
+    } else if (message.type === "MARK_ENCOUNTER_FEEDBACK") {
+        const { tweetUrl, elementValue, elementType, feedback } = message.data;
+        chrome.storage.local.get('loggedEncounters', (result) => {
+            let encounters = result.loggedEncounters || [];
+            const encounterIndex = encounters.findIndex(enc =>
+                enc.tweetUrl === tweetUrl &&
+                enc.matchedElement.value === elementValue &&
+                enc.matchedElement.type === elementType
+            );
+
+            if (encounterIndex !== -1) {
+                encounters[encounterIndex].userFeedback = feedback; // Add/update feedback field
+                chrome.storage.local.set({ loggedEncounters: encounters }, () => {
+                    if (chrome.runtime.lastError) {
+                        console.error("CogSec X-Ray: Error saving feedback to storage:", chrome.runtime.lastError.message);
+                        sendResponse({ success: false, status: "Error saving feedback." });
+                    } else {
+                        // console.log(`Feedback '${feedback}' saved for encounter: ${tweetUrl} - ${elementValue}`);
+                        sendResponse({ success: true, status: "Feedback saved." });
+                    }
+                });
+            } else {
+                console.warn("CogSec X-Ray: Encounter not found for feedback:", message.data);
+                sendResponse({ success: false, status: "Encounter not found." });
+            }
+        });
+        return true; // Async response
     }
 
     // Default response for unhandled messages
