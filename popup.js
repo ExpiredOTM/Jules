@@ -2,16 +2,19 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // Navigation
+    // Navigation
     const navElementsButton = document.getElementById('navElements');
     const navDashboardButton = document.getElementById('navDashboard');
+    const navSuggestionsButton = document.getElementById('navSuggestions'); // New
     const navSettingsButton = document.getElementById('navSettings');
 
     const elementsView = document.getElementById('elementsView');
     const dashboardView = document.getElementById('dashboardView');
+    const suggestionsView = document.getElementById('suggestionsView'); // New
     const settingsView = document.getElementById('settingsView');
 
-    const views = [elementsView, dashboardView, settingsView];
-    const navButtons = [navElementsButton, navDashboardButton, navSettingsButton];
+    const views = [elementsView, dashboardView, suggestionsView, settingsView];
+    const navButtons = [navElementsButton, navDashboardButton, navSuggestionsButton, navSettingsButton];
 
     function showView(viewToShow) {
         views.forEach(view => view.classList.add('hidden'));
@@ -22,7 +25,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     navElementsButton.addEventListener('click', () => showView({view: elementsView, button: navElementsButton}));
-    navDashboardButton.addEventListener('click', () => showView({view: dashboardView, button: navDashboardButton}));
+    navDashboardButton.addEventListener('click', () => {
+        showView({view: dashboardView, button: navDashboardButton});
+        loadEncounters(); // Reload encounters when dashboard is viewed
+    });
+    navSuggestionsButton.addEventListener('click', () => { // New
+        showView({view: suggestionsView, button: navSuggestionsButton});
+        // Potentially load/clear previous suggestions or show placeholder
+        updateSuggestionViewDisplay();
+    });
     navSettingsButton.addEventListener('click', () => showView({view: settingsView, button: navSettingsButton}));
 
     // Initialize with the elements view
@@ -135,6 +146,244 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial load
     loadElements();
+
+    // --- Suggestion View Globals ---
+    const suggestionSourceLink = document.getElementById('suggestionSourceLink');
+    const suggestionSourceAuthor = document.getElementById('suggestionSourceAuthor');
+    const suggestionTweetText = document.getElementById('suggestionTweetText');
+    const suggestedHandlesList = document.getElementById('suggestedHandlesList');
+    const suggestedHashtagsList = document.getElementById('suggestedHashtagsList');
+    const suggestedKeywordsList = document.getElementById('suggestedKeywordsList');
+    const suggestedURLsList = document.getElementById('suggestedURLsList');
+    const addSuggestionsForm = document.getElementById('addSuggestionsForm');
+    const noSuggestionsText = document.getElementById('noSuggestionsText');
+    const suggestionsListContainer = document.getElementById('suggestionsListContainer');
+
+    const handlesCountSpan = document.getElementById('handlesCount');
+    const hashtagsCountSpan = document.getElementById('hashtagsCount');
+    const keywordsCountSpan = document.getElementById('keywordsCount');
+    const urlsCountSpan = document.getElementById('urlsCount');
+
+
+    let currentSuggestions = null; // To store the latest received suggestions
+
+    // --- Element Management (handleAddElement needs to be accessible) ---
+    // (handleAddElement and related functions are already defined above)
+    // We might need to call handleAddElement from the suggestions logic.
+
+    // --- Listen for suggestions from content script ---
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        if (message.type === "DISPLAY_SUGGESTIONS") {
+            console.log("Popup received suggestions:", message.data);
+            currentSuggestions = message.data;
+            populateSuggestionsView(message.data);
+            showView({ view: suggestionsView, button: navSuggestionsButton }); // Switch to suggestions view
+            sendResponse({ status: "Suggestions received by popup" });
+        }
+        // Keep other message listeners if any (e.g. for future background script communication)
+        return true; // Keep channel open for async response if needed by other handlers
+    });
+
+    function updateSuggestionViewDisplay() {
+        if (currentSuggestions) {
+            populateSuggestionsView(currentSuggestions);
+            suggestionsListContainer.classList.remove('hidden');
+            noSuggestionsText.classList.add('hidden');
+        } else {
+            suggestionSourceLink.textContent = 'N/A';
+            suggestionSourceLink.href = '#';
+            suggestionSourceAuthor.textContent = 'N/A';
+            suggestionTweetText.textContent = 'No tweet selected for suggestions yet.';
+            clearSuggestionLists();
+            suggestionsListContainer.classList.add('hidden');
+            noSuggestionsText.classList.remove('hidden');
+        }
+    }
+
+    function clearSuggestionLists() {
+        suggestedHandlesList.innerHTML = '';
+        suggestedHashtagsList.innerHTML = '';
+        suggestedKeywordsList.innerHTML = '';
+        suggestedURLsList.innerHTML = '';
+        handlesCountSpan.textContent = '(0)';
+        hashtagsCountSpan.textContent = '(0)';
+        keywordsCountSpan.textContent = '(0)';
+        urlsCountSpan.textContent = '(0)';
+    }
+
+    function populateSuggestionsView(data) {
+        if (!data || !data.suggestions) {
+            updateSuggestionViewDisplay(); // Show "No suggestions" text
+            return;
+        }
+
+        suggestionSourceLink.href = data.tweetUrl || '#';
+        suggestionSourceLink.textContent = data.tweetUrl ? data.tweetUrl.substring(0, 50) + '...' : 'Unknown Source';
+        suggestionSourceAuthor.textContent = data.tweetAuthor || 'Unknown Author';
+        suggestionTweetText.textContent = data.tweetText ? `"${escapeHTML(data.tweetText.substring(0,200))}${data.tweetText.length > 200 ? '...' : ''}"` : "No text provided.";
+
+        suggestionsListContainer.classList.remove('hidden');
+        noSuggestionsText.classList.add('hidden');
+
+        const { handles, hashtags, keywords, urls } = data.suggestions;
+
+        renderSuggestionCategory(suggestedHandlesList, handles, 'handle', handlesCountSpan);
+        renderSuggestionCategory(suggestedHashtagsList, hashtags, 'hashtag', hashtagsCountSpan);
+        renderSuggestionCategory(suggestedKeywordsList, keywords, 'keyword', keywordsCountSpan);
+        renderSuggestionCategory(suggestedURLsList, urls, 'url_pattern', urlsCountSpan); // URLs are suggested as 'url_pattern' type
+    }
+
+    function renderSuggestionCategory(ulElement, items, type, countSpan) {
+        ulElement.innerHTML = '';
+        countSpan.textContent = `(${items ? items.length : 0})`;
+        if (!items || items.length === 0) {
+            ulElement.innerHTML = '<li>None</li>';
+            return;
+        }
+        items.forEach(item => {
+            const itemLower = item.toLowerCase();
+            // Don't suggest elements that are already being tracked OR previously ignored
+            if (trackingElements.some(el => el.value.toLowerCase() === itemLower && el.type === type)) {
+                // countSpan.textContent will be updated at the end based on actual children
+                return;
+            }
+            if (ignoredSuggestions.has(`${type}:${itemLower}`)) {
+                // countSpan.textContent will be updated at the end
+                return;
+            }
+
+            const li = document.createElement('li');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = item;
+            checkbox.dataset.type = type;
+            checkbox.id = `suggest-${type}-${item.replace(/[^a-zA-Z0-9]/g, "")}`; // Create a somewhat unique ID
+
+            const label = document.createElement('label');
+            label.htmlFor = checkbox.id;
+            label.className = 'suggestion-value';
+            label.textContent = escapeHTML(item);
+
+            li.appendChild(checkbox);
+            li.appendChild(label);
+            ulElement.appendChild(li);
+        });
+         if (ulElement.children.length === 0) {
+            ulElement.innerHTML = '<li>All items already tracked or none to suggest.</li>';
+            countSpan.textContent = '(0)';
+        } else {
+            countSpan.textContent = `(${ulElement.children.length})`;
+        }
+    }
+
+    if (addSuggestionsForm) {
+        addSuggestionsForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const selectedSuggestions = [];
+            addSuggestionsForm.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+                selectedSuggestions.push({
+                    value: cb.value,
+                    type: cb.dataset.type,
+                    notes: `Suggested from: ${currentSuggestions ? currentSuggestions.tweetAuthor : 'Unknown'}` // Add source note
+                });
+            });
+
+            if (selectedSuggestions.length === 0) {
+                alert("No suggestions selected to add.");
+                return;
+            }
+
+            let addedCount = 0;
+            for (const suggestion of selectedSuggestions) {
+                // Check for duplicates again before adding, though renderSuggestionCategory should prevent existing ones from being checkable
+                if (!trackingElements.some(el => el.value.toLowerCase() === suggestion.value.toLowerCase() && el.type === suggestion.type)) {
+                    trackingElements.push(suggestion);
+                    addedCount++;
+                }
+            }
+
+            if (addedCount > 0) {
+                await chrome.storage.local.set({ trackingElements });
+                renderElements(); // Re-render the main tracking elements list
+                alert(`${addedCount} new element(s) added to tracking.`);
+            } else if (selectedSuggestions.length > 0) { // They selected items, but all were already tracked
+                 alert("Selected suggestions are already tracked or no new valid suggestions to add.");
+            } else { // No items were selected
+                alert("No suggestions selected to add.");
+                return; // Don't proceed to ignore logic if nothing was selected
+            }
+
+            // Add unselected suggestions from the current view to the ignored list
+            let newlyIgnoredCount = 0;
+            if (currentSuggestions && currentSuggestions.suggestions) {
+                const allCheckboxes = addSuggestionsForm.querySelectorAll('input[type="checkbox"]');
+                allCheckboxes.forEach(cb => {
+                    if (!cb.checked) {
+                        const type = cb.dataset.type;
+                        const value = cb.value.toLowerCase();
+                        const ignoredKey = `${type}:${value}`;
+                        if (!ignoredSuggestions.has(ignoredKey)) {
+                            ignoredSuggestions.add(ignoredKey);
+                            newlyIgnoredCount++;
+                        }
+                    }
+                });
+                if (newlyIgnoredCount > 0) {
+                    await saveIgnoredSuggestions();
+                    console.log(`Added ${newlyIgnoredCount} items to ignored suggestions.`);
+                }
+            }
+
+            currentSuggestions = null; // Clear suggestions after processing
+            updateSuggestionViewDisplay(); // This will show "No suggestions text" or update lists
+            if (addedCount > 0) { // Only switch view if something was actually added
+                showView({view: elementsView, button: navElementsButton}); // Switch back to elements view
+            }
+        });
+    }
+    // Initial call to set the correct state of the suggestions view
+    updateSuggestionViewDisplay();
+
+    let ignoredSuggestions = new Set(); // In-memory set for current session
+
+    async function loadIgnoredSuggestions() {
+        const data = await chrome.storage.local.get('ignoredSuggestions');
+        if (data.ignoredSuggestions && Array.isArray(data.ignoredSuggestions)) {
+            ignoredSuggestions = new Set(data.ignoredSuggestions);
+        } else {
+            ignoredSuggestions = new Set(); // Initialize if not present
+            await saveIgnoredSuggestions(); // And save empty set
+        }
+        // console.log("Loaded ignored suggestions:", ignoredSuggestions.size);
+    }
+    async function saveIgnoredSuggestions() {
+        await chrome.storage.local.set({ ignoredSuggestions: Array.from(ignoredSuggestions) });
+        // console.log("Saved ignored suggestions:", ignoredSuggestions.size);
+    }
+
+    // Call on popup load
+    loadIgnoredSuggestions();
+
+    // --- Settings View Additions ---
+    const settingsViewSection = document.getElementById('settingsView');
+    const clearIgnoredButton = document.createElement('button');
+    clearIgnoredButton.id = 'clearIgnoredSuggestionsButton';
+    clearIgnoredButton.textContent = 'Clear Ignored Suggestions List';
+    clearIgnoredButton.style.marginTop = '15px';
+
+    clearIgnoredButton.addEventListener('click', async () => {
+        if (confirm("Are you sure you want to clear the list of all ignored suggestions? This might cause previously dismissed suggestions to reappear.")) {
+            ignoredSuggestions.clear();
+            await saveIgnoredSuggestions();
+            alert("Ignored suggestions list has been cleared.");
+        }
+    });
+    // Add a little div wrapper for styling if needed
+    const ignoredButtonContainer = document.createElement('div');
+    ignoredButtonContainer.style.marginTop = '20px';
+    ignoredButtonContainer.appendChild(clearIgnoredButton);
+    settingsViewSection.appendChild(ignoredButtonContainer);
+
 
     // --- Dashboard Functionality ---
     const encountersLogUL = document.getElementById('encountersLog');

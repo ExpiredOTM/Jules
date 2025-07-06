@@ -1,9 +1,30 @@
-/* CogSec X-Ray - popup.css */
+/* CogSec X-Ray - popup.css - Refined Theme */
+:root {
+    --dark-bg: #1A1A1D; /* Very dark grey, almost black */
+    --card-bg: #2C2C30; /* Slightly lighter dark grey for cards/sections */
+    --text-primary: #EAEAEA; /* Light grey for primary text */
+    --text-secondary: #9E9E9E; /* Medium grey for secondary text/notes */
+
+    --accent-pink-dulled: #C2185B; /* Dulled Neon Pink - Was #E040FB, now more muted */
+    --accent-cyan-dulled: #00ACC1; /* Dulled Neon Cyan - Was #26C6DA */
+    --accent-amber-dulled: #FFA000; /* Dulled Neon Amber/Gold - Was #FFB300 */
+
+    --border-color: var(--accent-cyan-dulled); /* Default border accent */
+    --button-primary-bg: var(--accent-cyan-dulled);
+    --button-primary-text: #111;
+    --button-secondary-bg: var(--accent-pink-dulled);
+    --button-secondary-text: var(--text-primary);
+
+    --input-bg: rgba(0,0,0,0.2);
+    --input-border: var(--accent-cyan-dulled);
+    --input-text: var(--text-primary);
+}
+
 body {
-    font-family: 'Courier New', Courier, monospace;
-    background: linear-gradient(135deg, #1a001a, #2a003a); /* Deep purple/violet gradient */
-    color: #ffffff;
-    width: 400px; /* Or your desired width */
+    font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; /* Modern sans-serif */
+    background-color: var(--dark-bg);
+    color: var(--text-primary);
+    width: 420px; /* Slightly wider for more content */
     margin: 0;
     padding: 0;
     font-size: 14px;
@@ -15,79 +36,85 @@ body {
 
 header {
     text-align: center;
-    border-bottom: 2px solid #ff00ff; /* Hot pink accent */
+    border-bottom: 1px solid var(--accent-pink-dulled); /* Thinner border */
     padding-bottom: 10px;
     margin-bottom: 15px;
 }
 
 header h1 {
     margin: 0;
-    font-size: 1.8em; /* Adjusted for popup */
-    color: #00ffff; /* Cyan blue accent */
-    text-shadow: 0 0 3px #00ffff, 0 0 6px #00ffff;
+    font-size: 1.8em;
+    color: var(--accent-cyan-dulled);
+    text-shadow: 0 0 5px rgba(0, 172, 193, 0.5); /* Softer shadow */
+    font-weight: 300; /* Lighter font weight for a sleeker look */
 }
 
-/* Basic Glitch Effect for header */
+/* Softer Glitch Effect */
 .glitch-text {
     position: relative;
-    animation: glitch-animation 2.5s infinite steps(8);
+    /* animation: glitch-animation-soft 3s infinite steps(6); */ /* Optional: make it less frequent or remove */
     display: inline-block;
 }
 
-@keyframes glitch-animation {
-    0% { text-shadow: 1px 0px #ff00ff, -1px 0px #00ffff; transform: translate(0,0) skewX(0deg); opacity: 1; }
-    5% { text-shadow: -1px 0px #ff00ff, 1px 0px #00ffff; transform: translate(-1px,0px) skewX(2deg); opacity: 0.8; }
-    10% { text-shadow: 1px 0px #00ffff, -1px 0px #ff00ff; transform: translate(0px,-0px) skewX(-2deg); opacity: 1; }
-    15% { text-shadow: 0px 1px #ff00ff, 0px -1px #00ffff; transform: translate(0,0) skewX(0deg); opacity: 0.7; }
-    20% { text-shadow: 1px 1px #00ffff, -1px -1px #ff00ff; transform: translate(1px,0px) skewX(0deg); opacity: 1; }
-    100% { text-shadow: 1px 0px #ff00ff, -1px 0px #00ffff; transform: translate(0,0) skewX(0deg); opacity: 1; }
-}
+/* @keyframes glitch-animation-soft {
+    0% { text-shadow: 0.5px 0px var(--accent-pink-dulled), -0.5px 0px var(--accent-cyan-dulled); opacity: 0.95; }
+    20% { text-shadow: -0.5px 0px var(--accent-pink-dulled), 0.5px 0px var(--accent-cyan-dulled); opacity: 1; }
+    40% { text-shadow: 0.5px 0.5px var(--accent-pink-dulled), -0.5px -0.5px var(--accent-cyan-dulled); opacity: 0.9; }
+    60% { text-shadow: -0.5px -0.5px var(--accent-pink-dulled), 0.5px 0.5px var(--accent-cyan-dulled); opacity: 1; }
+    80% { text-shadow: 0.5px -0.5px var(--accent-pink-dulled), -0.5px 0.5px var(--accent-cyan-dulled); opacity: 0.95; }
+    100% { text-shadow: 0.5px 0px var(--accent-pink-dulled), -0.5px 0px var(--accent-cyan-dulled); opacity: 1; }
+} */
+/* Decided to remove automatic glitch on H1 for a cleaner look, can be applied selectively if needed */
 
 
 nav {
     display: flex;
     justify-content: space-around;
-    margin-bottom: 15px;
+    margin-bottom: 20px; /* Increased spacing */
 }
 
 nav button {
-    background-color: rgba(20, 20, 40, 0.7);
-    color: #00ffff;
-    border: 1px solid #00ffff;
+    background-color: var(--card-bg);
+    color: var(--accent-cyan-dulled);
+    border: 1px solid var(--accent-cyan-dulled);
     padding: 8px 12px;
     border-radius: 4px;
     cursor: pointer;
     font-family: inherit;
     font-size: 0.9em;
-    transition: background-color 0.3s, box-shadow 0.3s;
+    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
 }
 
 nav button:hover {
-    background-color: rgba(30, 30, 60, 0.9);
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    background-color: var(--accent-cyan-dulled);
+    color: var(--button-primary-text);
+    box-shadow: 0 0 8px rgba(0, 172, 193, 0.4);
 }
 
 nav button.active {
-    background-color: #00ffff;
-    color: #1a001a;
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+    background-color: var(--accent-cyan-dulled);
+    color: var(--button-primary-text);
+    font-weight: bold;
+    box-shadow: 0 0 12px rgba(0, 172, 193, 0.6);
 }
 
 main section {
-    background-color: rgba(20, 20, 40, 0.6);
-    border: 1px solid #ff00ff;
+    background-color: var(--card-bg);
+    border: 1px solid #38383c; /* Darker, less prominent border */
     border-radius: 6px;
     padding: 15px;
-    margin-bottom: 15px;
+    margin-bottom: 20px; /* Increased spacing */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3); /* Softer shadow */
 }
 
 main section h2 {
-    color: #ffd700; /* Golden yellow accent */
+    color: var(--accent-amber-dulled);
     margin-top: 0;
-    margin-bottom: 10px;
+    margin-bottom: 15px; /* Increased spacing */
     font-size: 1.3em;
-    border-bottom: 1px dashed #ffd700;
-    padding-bottom: 5px;
+    border-bottom: 1px solid var(--accent-amber-dulled);
+    padding-bottom: 8px; /* Increased padding */
+    font-weight: 400;
 }
 
 .hidden {
@@ -96,179 +123,333 @@ main section h2 {
 
 /* Form Styles */
 form div {
-    margin-bottom: 10px;
+    margin-bottom: 12px; /* Increased spacing */
 }
 
 form label {
     display: block;
-    margin-bottom: 3px;
-    color: #ccc;
+    margin-bottom: 5px; /* Increased spacing */
+    color: var(--text-secondary);
     font-size: 0.9em;
 }
 
 form input[type="text"],
 form select,
 form textarea {
-    width: calc(100% - 12px); /* Account for padding */
-    background-color: rgba(0,0,0,0.3);
-    color: #fff;
-    border: 1px solid #00ffff;
-    padding: 5px;
+    width: calc(100% - 16px); /* Account for padding */
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border: 1px solid var(--input-border);
+    padding: 8px; /* Increased padding */
     border-radius: 3px;
     font-family: inherit;
+    box-sizing: border-box; /* Ensure padding doesn't expand width */
+}
+form input[type="text"]:focus,
+form select:focus,
+form textarea:focus {
+    outline: none;
+    border-color: var(--accent-pink-dulled);
+    box-shadow: 0 0 5px rgba(194, 24, 91, 0.5);
 }
 
+
 form textarea {
-    min-height: 40px;
+    min-height: 50px;
     resize: vertical;
 }
 
 form button[type="submit"],
 button { /* General button styling */
-    background-color: #00ffff;
-    color: #1a001a;
+    background-color: var(--button-primary-bg);
+    color: var(--button-primary-text);
     border: none;
-    padding: 8px 15px;
+    padding: 10px 18px; /* Increased padding */
     border-radius: 4px;
     cursor: pointer;
     font-family: inherit;
-    font-weight: bold;
-    transition: background-color 0.3s, transform 0.2s;
+    font-weight: 500; /* Medium weight */
+    transition: background-color 0.2s, transform 0.1s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9em;
 }
 
 form button[type="submit"]:hover,
 button:hover {
-    background-color: #5effff;
+    background-color: #00BCD4; /* Slightly brighter cyan on hover */
     transform: translateY(-1px);
 }
 
 button.delete-element {
-    background-color: #ff00ff;
-    color: #fff;
+    background-color: var(--button-secondary-bg);
+    color: var(--button-secondary-text);
     font-size: 0.8em;
-    padding: 3px 8px;
+    padding: 4px 8px; /* Adjusted padding */
     margin-left: 10px;
+    text-transform: none; /* Revert uppercase for small buttons */
+    letter-spacing: normal;
 }
 button.delete-element:hover {
-    background-color: #ff55ff;
+    background-color: #D81B60; /* Darker pink on hover */
 }
 
 
 /* Elements List & Encounters Log */
-#elementsListContainer, #encountersLogContainer {
-    margin-top: 15px;
+#elementsListContainer, #encountersLogContainer, #suggestionsViewContainer /* Added for suggestions */ {
+    margin-top: 20px; /* Increased spacing */
 }
 
-#elementsListContainer h3, #dashboardView h3 /* If you add h3 in dashboard */ {
-    color: #ccc;
+#elementsListContainer h3, #dashboardView h3, #suggestionsView h3 {
+    color: var(--text-secondary);
     font-size: 1.1em;
-    margin-bottom: 8px;
+    margin-bottom: 10px; /* Increased spacing */
 }
 
-#elementsList, #encountersLog {
+#elementsList, #encountersLog, #suggestionsList /* Added for suggestions */ {
     list-style-type: none;
     padding: 0;
-    max-height: 150px; /* Or desired height */
+    max-height: 180px; /* Increased height */
     overflow-y: auto;
-    border: 1px solid #444;
+    border: 1px solid #333; /* Slightly lighter border for lists */
     border-radius: 3px;
-    padding: 5px;
-    background-color: rgba(0,0,0,0.2);
+    padding: 8px; /* Increased padding */
+    background-color: rgba(0,0,0,0.15); /* Slightly more distinct background */
 }
 
-#elementsList li, #encountersLog li {
-    padding: 6px;
-    border-bottom: 1px solid #333;
-    font-size: 0.9em;
+#elementsList li, #encountersLog li, #suggestionsList li /* Added for suggestions */ {
+    padding: 8px 10px; /* Increased padding */
+    border-bottom: 1px solid #2a2a2e; /* Darker separator */
+    font-size: 0.95em; /* Slightly larger */
     display: flex;
     justify-content: space-between;
     align-items: center;
+    line-height: 1.4;
 }
-#elementsList li:last-child, #encountersLog li:last-child {
+#elementsList li:last-child, #encountersLog li:last-child, #suggestionsList li:last-child {
     border-bottom: none;
 }
 
-.element-value {
-    font-weight: bold;
-    color: #00ffff;
+.element-value, .suggestion-value {
+    font-weight: 500; /* Medium weight */
+    color: var(--accent-cyan-dulled);
 }
-.element-type {
-    font-style: italic;
-    color: #ffd700;
-    margin-left: 5px;
-    font-size: 0.85em;
-}
-.element-notes { /* Style for notes in element list */
+.element-type, .suggestion-type {
+    font-style: normal; /* Less italic */
+    color: var(--accent-amber-dulled);
+    margin-left: 8px; /* Increased spacing */
     font-size: 0.8em;
-    color: #aaa;
-    margin-left: 5px;
+    background-color: rgba(255, 160, 0, 0.1);
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+.element-notes {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    margin-left: 8px;
     font-style: italic;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 100px; /* Adjust as needed */
+    max-width: 120px; /* Slightly increased */
+    flex-shrink: 1; /* Allow shrinking */
 }
-
 
 /* Dashboard specific */
-#dashboardView input[type="text"], #dashboardView select {
-    width: auto; /* Adjust for dashboard layout */
-    margin-right: 10px;
-    margin-bottom: 10px; /* For mobile-like stacking */
-    padding: 6px; /* Consistent padding */
-}
-
-#dashboardView div:first-of-type { /* Targeting the controls container */
+#dashboardView .controls-container { /* Specific class for controls */
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+}
+#dashboardView .controls-container input[type="text"],
+#dashboardView .controls-container select {
+    flex-grow: 1; /* Allow search and filter to take available space */
+    min-width: 120px; /* Minimum width for filter/search */
 }
 
 
 #clearEncountersButton, #exportDataButton {
-    background-color: #ff00ff;
-    color: #fff;
-    margin-left: 5px;
+    background-color: var(--button-secondary-bg);
+    color: var(--button-secondary-text);
+    margin-left: 0; /* Handled by gap in flex container */
 }
 #clearEncountersButton:hover, #exportDataButton:hover {
-    background-color: #ff55ff;
+    background-color: #D81B60; /* Darker pink on hover */
 }
+
+/* Encounter item details */
+.encounter-details {
+    flex-grow: 1;
+}
+.encounter-details .matched-element-value { color: var(--accent-pink-dulled); }
+.encounter-details .matched-element-type { color: var(--accent-amber-dulled); font-size: 0.8em; }
+.encounter-details .tweet-author { color: var(--text-secondary); font-size: 0.9em; }
+.encounter-details .tweet-text-snippet { color: var(--text-primary); font-size: 0.9em; margin: 3px 0; display: block;}
+.encounter-details .tweet-link { color: var(--accent-cyan-dulled); text-decoration: none; font-size: 0.85em; }
+.encounter-details .tweet-link:hover { text-decoration: underline; }
+.encounter-details .timestamp { color: var(--text-secondary); font-size: 0.8em; margin-left: 5px; }
 
 
 /* Settings */
 #settingsView label {
-    display: inline-block; /* Align checkbox with label */
+    display: flex; /* Use flex for better alignment */
+    align-items: center;
     margin-right: 10px;
+    color: var(--text-primary);
 }
 #settingsView input[type="checkbox"] {
     vertical-align: middle;
+    margin-right: 8px; /* Space between checkbox and label text */
+    appearance: none;
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 3px;
+    width: 16px;
+    height: 16px;
+    position: relative;
+    cursor: pointer;
+}
+#settingsView input[type="checkbox"]:checked {
+    background-color: var(--accent-cyan-dulled);
+    border-color: var(--accent-cyan-dulled);
+}
+#settingsView input[type="checkbox"]:checked::after {
+    content: '✔';
+    position: absolute;
+    color: var(--dark-bg);
+    font-size: 12px;
+    top: 0px;
+    left: 2px;
+    font-weight: bold;
 }
 
 
 footer {
     text-align: center;
-    margin-top: 15px;
+    margin-top: 20px; /* Increased spacing */
     padding-top: 10px;
-    border-top: 1px solid #00ffff;
-    font-size: 0.8em;
-    color: #aaa;
+    border-top: 1px solid var(--accent-cyan-dulled);
+    font-size: 0.85em; /* Slightly larger */
+    color: var(--text-secondary);
 }
 
 /* Scrollbar styles */
 ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px; /* Slightly wider */
+    height: 8px;
 }
 ::-webkit-scrollbar-track {
-    background: #1a001a;
+    background: var(--dark-bg); /* Match body background */
+    border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb {
-    background-color: #ff00ff;
-    border-radius: 3px;
-    border: 1px solid #00ffff;
+    background-color: var(--accent-pink-dulled); /* Dulled pink */
+    border-radius: 4px;
+    border: 1px solid var(--accent-cyan-dulled); /* Dulled cyan border */
 }
 ::-webkit-scrollbar-thumb:hover {
-    background-color: #ffd700;
+    background-color: #E040FB; /* Brighter pink on hover */
+}
+
+/* Styles for Suggestions View (Step 4) */
+#suggestionsList li {
+    cursor: pointer; /* Indicate items are selectable */
+    transition: background-color 0.2s;
+}
+#suggestionsList li:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+#suggestionsList li.selected-suggestion {
+    background-color: rgba(0, 172, 193, 0.2); /* Dulled cyan highlight for selected */
+    border-left: 3px solid var(--accent-cyan-dulled);
+}
+#suggestionsList input[type="checkbox"] {
+    margin-right: 10px;
+    vertical-align: middle;
+}
+#addSelectedSuggestionsButton {
+    margin-top: 15px;
+    width: 100%; /* Make button full width */
+    box-sizing: border-box;
+}
+#clearIgnoredSuggestionsButton {
+    background-color: var(--accent-amber-dulled);
+    color: var(--dark-bg);
+    margin-top: 10px; /* In settings view */
+}
+#clearIgnoredSuggestionsButton:hover {
+    background-color: #FFC107; /* Brighter amber */
+}
+
+/* Suggestion specific list styling */
+.suggestion-category {
+    margin-bottom: 15px;
+}
+.suggestion-category h4 {
+    color: var(--accent-amber-dulled);
+    font-size: 1em;
+    margin-bottom: 5px;
+    border-bottom: 1px solid var(--card-bg); /* Softer separator */
+    padding-bottom: 3px;
+}
+.suggestion-count {
+    font-size: 0.8em;
+    color: var(--text-secondary);
+}
+.suggestion-item-list {
+    list-style-type: none;
+    padding-left: 0; /* Remove default ul padding */
+    max-height: 100px; /* Limit height for each category list */
+    overflow-y: auto;
+    background-color: rgba(0,0,0,0.1); /* Slightly different from main lists */
+    border-radius: 3px;
+    padding: 5px;
+}
+.suggestion-item-list li {
+    padding: 4px 8px; /* Slightly smaller padding for suggestion items */
+    border-bottom: 1px solid #38383c; /* Match other list item separators */
+    display: flex; /* For checkbox and label alignment */
+    align-items: center;
+}
+.suggestion-item-list li:last-child {
+    border-bottom: none;
+}
+.suggestion-item-list input[type="checkbox"] {
+    margin-right: 8px;
+    appearance: none;
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 3px;
+    width: 14px;
+    height: 14px;
+    position: relative;
+    cursor: pointer;
+    vertical-align: middle;
+}
+.suggestion-item-list input[type="checkbox"]:checked {
+    background-color: var(--accent-pink-dulled); /* Use pink for selected suggestions */
+    border-color: var(--accent-pink-dulled);
+}
+.suggestion-item-list input[type="checkbox"]:checked::after {
+    content: '✔';
+    position: absolute;
+    color: var(--text-primary);
+    font-size: 10px;
+    top: 1px;
+    left: 2px;
+    font-weight: bold;
+}
+.suggestion-item-list label { /* Label for the checkbox */
+    font-size: 0.9em;
+    color: var(--text-primary);
+    cursor: pointer;
+    word-break: break-all; /* Ensure long suggestions wrap */
+}
+
+#noSuggestionsText {
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 20px;
 }

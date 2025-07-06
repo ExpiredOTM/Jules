@@ -15,6 +15,7 @@
         <nav>
             <button id="navElements" class="active">Track Elements</button>
             <button id="navDashboard">Dashboard</button>
+            <button id="navSuggestions">Suggestions</button> <!-- New Nav Button -->
             <button id="navSettings">Settings</button>
         </nav>
 
@@ -68,6 +69,35 @@
                         <li>Example encounter...</li>
                     </ul>
                 </div>
+            </section>
+
+            <!-- Suggestions View -->
+            <section id="suggestionsView" class="hidden">
+                <h2>Element Suggestions</h2>
+                <p>Suggestions based on tweet from: <a href="#" id="suggestionSourceLink" target="_blank">source</a> by <span id="suggestionSourceAuthor"></span></p>
+                <p id="suggestionTweetText" class="tweet-text-snippet" style="max-height: 70px; overflow-y: auto; margin-bottom:10px; background-color: rgba(0,0,0,0.2); padding: 5px; border-radius: 3px;"></p>
+                <div id="suggestionsListContainer">
+                    <form id="addSuggestionsForm">
+                        <div class="suggestion-category">
+                            <h4>Handles <span class="suggestion-count" id="handlesCount"></span></h4>
+                            <ul id="suggestedHandlesList" class="suggestion-item-list"></ul>
+                        </div>
+                        <div class="suggestion-category">
+                            <h4>Hashtags <span class="suggestion-count" id="hashtagsCount"></span></h4>
+                            <ul id="suggestedHashtagsList" class="suggestion-item-list"></ul>
+                        </div>
+                        <div class="suggestion-category">
+                            <h4>Keywords <span class="suggestion-count" id="keywordsCount"></span></h4>
+                            <ul id="suggestedKeywordsList" class="suggestion-item-list"></ul>
+                        </div>
+                        <div class="suggestion-category">
+                            <h4>URLs <span class="suggestion-count" id="urlsCount"></span></h4>
+                            <ul id="suggestedURLsList" class="suggestion-item-list"></ul>
+                        </div>
+                        <button type="submit" id="addSelectedSuggestionsButton">Add Selected to Tracking</button>
+                    </form>
+                </div>
+                <p id="noSuggestionsText" class="hidden">No new suggestions at the moment. Click the 💡 icon on a tweet to get suggestions.</p>
             </section>
 
             <!-- Settings View -->

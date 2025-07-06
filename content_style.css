@@ -1,29 +1,61 @@
-/* CogSec X-Ray - content_style.css */
+/* CogSec X-Ray - content_style.css - Refined Theme */
 
 /*
 This file is for styling any UI elements that the content script might add to the page itself,
-such as visual highlights for matched tweets.
-Initially, it can be empty or have very basic styles.
+such as visual highlights for matched tweets and the new "Suggest Elements" button.
 */
 
+/* Dulled Neon Accent Colors - ensure these match popup.css variables if possible, or define explicitly */
+:root {
+    --csx-accent-pink-dulled: #C2185B;
+    --csx-accent-cyan-dulled: #00ACC1;
+    --csx-accent-amber-dulled: #FFA000;
+    --csx-dark-bg-alpha: rgba(26, 26, 29, 0.85); /* For button backgrounds on page */
+    --csx-text-primary: #EAEAEA;
+}
+
 .cogsec-highlighted-tweet {
-    border: 2px dashed #ff00ff !important; /* Hot pink, dashed */
-    box-shadow: 0 0 10px #ff00ff;
-    padding: 2px; /* Add a little space so border isn't right on content */
-    border-radius: 5px; /* Optional: rounded corners for the highlight */
-    transition: border 0.3s ease-out, box-shadow 0.3s ease-out;
+    border: 2px solid var(--csx-accent-pink-dulled) !important; /* Solid, dulled pink */
+    box-shadow: 0 0 8px rgba(194, 24, 91, 0.6); /* Softer shadow with dulled pink */
+    /* padding: 1px; remove padding to avoid layout shifts if possible, or make it very small */
+    border-radius: 4px;
+    transition: box-shadow 0.3s ease-out;
+    /* position: relative; */ /* Might be needed if adding pseudo-elements for more complex highlighting */
 }
 
 .cogsec-highlighted-tweet:hover {
-    border-style: solid !important;
-    box-shadow: 0 0 15px #ff55ff;
+    box-shadow: 0 0 12px rgba(194, 24, 91, 0.8); /* Slightly more prominent shadow on hover */
 }
 
-/* Example for highlighting specific text within a tweet, if implemented */
+/* Suggest Elements Button (to be added by content_script.js) */
+.cogsec-suggest-button {
+    background-color: var(--csx-dark-bg-alpha) !important;
+    color: var(--csx-accent-cyan-dulled) !important;
+    border: 1px solid var(--csx-accent-cyan-dulled) !important;
+    padding: 2px 6px !important;
+    font-size: 10px !important; /* Small and unobtrusive */
+    font-family: 'Segoe UI', 'Roboto', sans-serif !important; /* Consistent font */
+    border-radius: 3px !important;
+    cursor: pointer !important;
+    margin-left: 8px !important;
+    opacity: 0.7 !important;
+    transition: opacity 0.2s, background-color 0.2s !important;
+    vertical-align: middle; /* Align with other tweet action icons */
+    line-height: 1.2 !important; /* Ensure text fits */
+}
+
+.cogsec-suggest-button:hover {
+    opacity: 1 !important;
+    background-color: var(--csx-accent-cyan-dulled) !important;
+    color: #111 !important; /* Dark text for contrast on hover */
+    box-shadow: 0 0 5px rgba(0, 172, 193, 0.5) !important;
+}
+
+/* Example for highlighting specific text within a tweet, if implemented (keeping for reference) */
 .cogsec-highlighted-text-match {
-    background-color: rgba(255, 215, 0, 0.3) !important; /* Golden yellow, semi-transparent */
-    color: #ffffff !important; /* Ensure text is readable */
+    background-color: rgba(255, 160, 0, 0.25) !important; /* Dulled amber, semi-transparent */
+    color: var(--csx-text-primary) !important; /* Ensure text is readable */
     padding: 0 2px;
     border-radius: 2px;
-    font-weight: bold;
+    font-weight: normal; /* Less aggressive than bold */
 }
