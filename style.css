@@ -1,0 +1,291 @@
+/* General Body Styles */
+body {
+    background: linear-gradient(135deg, #1a001a, #2a003a); /* Deep purple/violet gradient */
+    color: #ffffff; /* High contrast white text */
+    font-family: 'Courier New', Courier, monospace; /* Monospace font */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-image:
+        radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0); /* Dotted grid */
+    background-size: 20px 20px; /* Size of the grid cells */
+}
+
+/* Header Styles */
+header {
+    background-color: rgba(0, 0, 0, 0.3); /* Darker, semi-transparent header */
+    padding: 20px;
+    text-align: center;
+    border-bottom: 2px solid #ff00ff; /* Hot pink accent */
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.5em;
+    color: #00ffff; /* Cyan blue accent */
+    text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
+}
+
+/* Main Content Styles */
+main {
+    flex-grow: 1;
+    padding: 20px;
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive card layout */
+}
+
+/* Card Styles */
+.card {
+    background-color: rgba(20, 20, 40, 0.8); /* Dark, semi-transparent card background */
+    border: 1px solid #ff00ff; /* Hot pink border */
+    border-radius: 8px; /* Rounded corners */
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.5); /* Hot pink glow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 25px rgba(255, 0, 255, 0.7);
+}
+
+.card h2 {
+    color: #ffd700; /* Golden yellow accent */
+    border-bottom: 1px dashed #ffd700;
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+
+.card p {
+    line-height: 1.6;
+}
+
+/* Tool Grid Specific Styles */
+.tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.tool-item {
+    background-color: rgba(30, 30, 50, 0.9); /* Slightly lighter card item background */
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #00ffff; /* Cyan accent for tool items */
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+    transition: background-color 0.3s ease;
+}
+
+.tool-item:hover {
+    background-color: rgba(40, 40, 60, 0.95);
+}
+
+.tool-item h3 {
+    color: #ff00ff; /* Hot pink for tool titles */
+    margin-top: 0;
+    font-size: 1.2em;
+}
+
+/* Footer Styles */
+footer {
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    text-align: center;
+    border-top: 2px solid #00ffff; /* Cyan blue accent */
+    font-size: 0.9em;
+    color: #aaa; /* Lighter grey for footer text */
+}
+
+footer p {
+    margin: 0;
+}
+
+/* Scrollbar styles for a more cyberpunk feel (optional, browser support varies) */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a001a;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #ff00ff;
+    border-radius: 4px;
+    border: 1px solid #00ffff;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #ffd700;
+}
+
+/* Basic Glitch Effect */
+.glitch-text {
+    position: relative;
+    /* color: white; Remove if inherited or set specifically where used */
+    animation: glitch-animation 2.5s infinite steps(8); /* steps() for more digital feel */
+    display: inline-block; /* Important for transform to behave as expected */
+}
+
+@keyframes glitch-animation {
+    0% {
+        text-shadow: 1px 0px #ff00ff, -1px 0px #00ffff;
+        transform: translate(0,0) skewX(0deg);
+        opacity: 1;
+    }
+    5% {
+        text-shadow: -1px 0px #ff00ff, 1px 0px #00ffff;
+        transform: translate(-2px,1px) skewX(5deg);
+        opacity: 0.8;
+    }
+    10% {
+        text-shadow: 1px 0px #00ffff, -1px 0px #ff00ff;
+        transform: translate(1px,-1px) skewX(-5deg);
+        opacity: 1;
+    }
+    15% {
+        text-shadow: 0px 1px #ff00ff, 0px -1px #00ffff;
+        transform: translate(0,0) skewX(0deg);
+        opacity: 0.7;
+    }
+    20% {
+        text-shadow: 1px 1px #00ffff, -1px -1px #ff00ff;
+        transform: translate(2px,1px) skewX(0deg);
+        opacity: 1;
+    }
+    /* Add more steps for a more chaotic glitch */
+    100% {
+        text-shadow: 1px 0px #ff00ff, -1px 0px #00ffff;
+        transform: translate(0,0) skewX(0deg);
+        opacity: 1;
+    }
+}
+
+
+/* Pixelated Element Styling */
+.pixelated-icon {
+    width: 48px; /* Multiple of common pixel art scales like 16 or 24 */
+    height: 48px;
+    background-color: #ffd700; /* Default, can be overridden inline */
+    border: none; /* Remove default border */
+    image-rendering: pixelated; /* For <img> tags if used */
+    image-rendering: -moz-crisp-edges; /* Firefox */
+    image-rendering: crisp-edges; /* Standard */
+
+    /* Using box-shadows to create a pixelated border effect */
+    /* This creates a 2px "blocky" border. Adjust thickness as needed. */
+    box-shadow:
+        /* Outer border */
+        0 2px 0 #000, 0 -2px 0 #000, 2px 0 0 #000, -2px 0 0 #000,
+        /* Inner "pixel" details if needed - more complex */
+        /* For a simple blocky border, the above is enough */
+        /* Example for inner pixel feel (can get very verbose) */
+        /* 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; */
+        inset 0 0 0 2px #222; /* Inner darker shade for depth */
+}
+
+/* Apply glitch effect to header h1 by default */
+header h1 {
+    margin: 0;
+    font-size: 2.5em;
+    color: #00ffff; /* Cyan blue accent */
+    text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 15px #00ffff; /* Enhanced glow */
+    position: relative; /* Needed for glitch animation if applied directly */
+    /* animation: glitch-animation 2.5s infinite steps(8); Optional: direct application */
+}
+
+
+/* Dashboard "Data Visualization" / "Glitch Art" Background */
+.data-visualization-placeholder {
+    position: relative;
+    min-height: 100px; /* Give it some space */
+    border-radius: 4px;
+    margin: 15px 0;
+    overflow: hidden; /* Keep pseudo elements contained */
+    background-color: rgba(0,0,0,0.2); /* Darker base for the effect */
+}
+
+.data-visualization-placeholder::before,
+.data-visualization-placeholder::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.data-visualization-placeholder::before {
+    /* Geometric lines pattern */
+    background:
+        linear-gradient(135deg, rgba(255,0,255,0.3) 2px, transparent 2px) 0 0, /* Hot Pink lines */
+        linear-gradient(135deg, rgba(255,0,255,0.3) 1px, transparent 1px) 10px 10px, /* Offset for density */
+        linear-gradient(45deg, rgba(0,255,255,0.3) 2px, transparent 2px) 0 0,   /* Cyan lines */
+        linear-gradient(45deg, rgba(0,255,255,0.3) 1px, transparent 1px) 10px 10px; /* Offset for density */
+    background-size: 20px 20px; /* Control density of lines */
+    opacity: 0.5;
+    animation: bg-scroll 20s linear infinite; /* Slow scroll for dynamic feel */
+}
+
+.data-visualization-placeholder::after {
+    /* Glitchy overlay */
+    background:
+        repeating-linear-gradient(0deg,
+            rgba(255,255,255,0.05),
+            rgba(255,255,255,0.05) 1px,
+            transparent 1px,
+            transparent 5px); /* Scanlines effect */
+    opacity: 0.3;
+    animation: glitch-overlay-animation 0.5s infinite steps(3, jump-none);
+}
+
+@keyframes bg-scroll {
+    0% { background-position: 0 0; }
+    100% { background-position: -400px -400px; } /* Adjust for desired scroll speed/distance */
+}
+
+@keyframes glitch-overlay-animation {
+    0% { transform: translateX(0); }
+    33% { transform: translateX(5px) translateY(2px); }
+    66% { transform: translateX(-3px) translateY(-1px); }
+    100% { transform: translateX(0); }
+}
+
+/* Ensure card content is above the pseudo-elements if they are on the card itself */
+#dashboard {
+    position: relative; /* Needed for stacking context if pseudo-elements were on #dashboard */
+    /* overflow: hidden; No longer needed here if using a dedicated placeholder div */
+}
+
+/* Style for the placeholder text inside data-visualization */
+.data-visualization-placeholder .glitch-text {
+    position: relative; /* Ensure it's above the ::before/::after of its parent */
+    z-index: 2;
+    color: #fff;
+    padding: 20px; /* Give it some space */
+    text-align: center;
+    font-size: 1.5em;
+    opacity: 0.9; /* Make it slightly more prominent than the background effect */
+    text-shadow: 0 0 5px #000; /* Slight shadow to lift it from the busy background */
+}
+
+/* Remove the old #dashboard::before style as it's replaced by .data-visualization-placeholder */
+#dashboard::before {
+    display: none;
+}
+
+/* Refine main grid for better spacing with more cards */
+main {
+    flex-grow: 1;
+    padding: 20px;
+    display: grid;
+    gap: 25px; /* Increased gap */
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Slightly larger min card width */
+}
