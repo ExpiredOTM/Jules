@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CogSec X-Ray Popup</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="glitch-text">CogSec X-Ray</h1>
+        </header>
+
+        <nav>
+            <button id="navElements" class="active">Track Elements</button>
+            <button id="navDashboard">Dashboard</button>
+            <button id="navSettings">Settings</button>
+        </nav>
+
+        <main>
+            <!-- Element Management View -->
+            <section id="elementsView">
+                <h2>Manage Tracking Elements</h2>
+                <form id="addElementForm">
+                    <div>
+                        <label for="elementInput">Element:</label>
+                        <input type="text" id="elementInput" placeholder="e.g., @username, #hashtag, keyword" required>
+                    </div>
+                    <div>
+                        <label for="elementType">Type:</label>
+                        <select id="elementType">
+                            <option value="keyword">Keyword</option>
+                            <option value="handle">Twitter Handle (e.g., @user)</option>
+                            <option value="hashtag">Hashtag (e.g., #topic)</option>
+                            <option value="url_pattern">URL Pattern (regex)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="elementNotes">Notes/Campaign ID (Optional):</label>
+                        <textarea id="elementNotes" placeholder="e.g., Disinfo Campaign X, Bot network Y"></textarea>
+                    </div>
+                    <button type="submit" id="addElementButton">Add Element</button>
+                </form>
+                <div id="elementsListContainer">
+                    <h3>Current Tracking Elements</h3>
+                    <ul id="elementsList">
+                        <!-- Elements will be listed here -->
+                        <li><span class="element-value">Example Element</span> <span class="element-type">(keyword)</span> <button class="delete-element" data-element-value="Example Element">Delete</button></li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Dashboard View -->
+            <section id="dashboardView" class="hidden">
+                <h2>Encounter Dashboard</h2>
+                <div>
+                    <input type="text" id="dashboardSearch" placeholder="Search encounters...">
+                    <select id="dashboardFilterElement">
+                        <option value="">Filter by Element</option>
+                    </select>
+                    <button id="clearEncountersButton">Clear All Encounters</button>
+                    <button id="exportDataButton">Export Data (JSON)</button>
+                </div>
+                <div id="encountersLogContainer">
+                    <ul id="encountersLog">
+                        <!-- Logged encounters will appear here -->
+                        <li>Example encounter...</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Settings View -->
+            <section id="settingsView" class="hidden">
+                <h2>Settings</h2>
+                <div>
+                    <label for="visualHighlightingToggle">Enable Visual Highlighting on Page:</label>
+                    <input type="checkbox" id="visualHighlightingToggle" checked>
+                </div>
+                <!-- More settings can be added here -->
+            </section>
+        </main>
+        <footer>
+            <p>CogSec X-Ray v0.1.0</p>
+        </footer>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>

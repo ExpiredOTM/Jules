@@ -1,0 +1,29 @@
+/* CogSec X-Ray - content_style.css */
+
+/*
+This file is for styling any UI elements that the content script might add to the page itself,
+such as visual highlights for matched tweets.
+Initially, it can be empty or have very basic styles.
+*/
+
+.cogsec-highlighted-tweet {
+    border: 2px dashed #ff00ff !important; /* Hot pink, dashed */
+    box-shadow: 0 0 10px #ff00ff;
+    padding: 2px; /* Add a little space so border isn't right on content */
+    border-radius: 5px; /* Optional: rounded corners for the highlight */
+    transition: border 0.3s ease-out, box-shadow 0.3s ease-out;
+}
+
+.cogsec-highlighted-tweet:hover {
+    border-style: solid !important;
+    box-shadow: 0 0 15px #ff55ff;
+}
+
+/* Example for highlighting specific text within a tweet, if implemented */
+.cogsec-highlighted-text-match {
+    background-color: rgba(255, 215, 0, 0.3) !important; /* Golden yellow, semi-transparent */
+    color: #ffffff !important; /* Ensure text is readable */
+    padding: 0 2px;
+    border-radius: 2px;
+    font-weight: bold;
+}
